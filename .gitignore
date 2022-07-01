@@ -1,0 +1,10 @@
+# Python
+venv
+.venv
+__pycache__
+
+# Terraform
+*.tfstate*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
