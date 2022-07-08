@@ -241,7 +241,7 @@ spec:
         - name: producer
           image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
           command: ["/app/consume.py"]
-          args: ["Consumer A"]
+          args: ["Consumer B"]
           env:
             - name: K2PS_BUS_BACKEND
               value: "kafka"
