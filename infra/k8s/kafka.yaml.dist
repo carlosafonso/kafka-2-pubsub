@@ -1,0 +1,251 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  labels:
+    name: zookeeper
+spec:
+  ports:
+    - port: 2181
+      name: zookeeper
+      protocol: TCP
+  selector:
+    app: zookeeper
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: bitnami/zookeeper:latest
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    name: kafka
+spec:
+  ports:
+    - port: 9092
+      name: kafka
+      protocol: TCP
+  selector:
+    app: kafka
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: bitnami/kafka:3.2.0
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_BROKER_ID
+              value: "1"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka:9092"
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafka-connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      containers:
+        - name: kafka-connect
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-connect:latest
+          command: ["/usr/bin/startup.sh"]
+          ports:
+            - containerPort: 8083
+          env:
+            - name: CONNECT_BOOTSTRAP_SERVERS
+              value: kafka:9092
+            - name: CONNECT_GROUP_ID
+              value: "1"
+            - name: CONNECT_CONFIG_STORAGE_TOPIC
+              value: connect-config-topic
+            - name: CONNECT_OFFSET_STORAGE_TOPIC
+              value: connect-offset-topic
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: connect-status-topic
+            - name: CONNECT_KEY_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: CONNECT_VALUE_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: kafka-connect
+            - name: CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_STATUS_STORAGE_REPLICATION_FACTOR
+              value: "1"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafkacat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafkacat
+  template:
+    metadata:
+      labels:
+        app: kafkacat
+    spec:
+      containers:
+        - name: kafkacat
+          image: confluentinc/cp-kafkacat
+          command: ["/bin/sh"]
+          args: ["-c", "trap : TERM INT; sleep infinity & wait"]
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: producer-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-a
+  template:
+    metadata:
+      labels:
+        app: producer-a
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/produce.py"]
+          args: ["Producer A"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: producer-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-b
+  template:
+    metadata:
+      labels:
+        app: producer-b
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/produce.py"]
+          args: ["Producer B"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: consumer-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-a
+  template:
+    metadata:
+      labels:
+        app: consumer-a
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/consume.py"]
+          args: ["Consumer A"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: consumer-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-b
+  template:
+    metadata:
+      labels:
+        app: consumer-b
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/consume.py"]
+          args: ["Consumer A"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
