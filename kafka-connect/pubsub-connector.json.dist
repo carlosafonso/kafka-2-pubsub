@@ -1,0 +1,9 @@
+{
+    "connector.class": "com.google.pubsub.kafka.sink.CloudPubSubSinkConnector",
+    "tasks.max": 10,
+    "topics": "kafka-2-pubsub",
+    "cps.topic": "kafka-2-pubsub",
+    "cps.project": "${GOOGLE_CLOUD_PROJECT}",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false
+}
