@@ -1,0 +1,43 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafka-connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      containers:
+        - name: kafka-connect
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-connect:latest
+          command: ["/usr/bin/startup.sh"]
+          ports:
+            - containerPort: 8083
+          env:
+            - name: CONNECT_BOOTSTRAP_SERVERS
+              value: kafka:9092
+            - name: CONNECT_GROUP_ID
+              value: "1"
+            - name: CONNECT_CONFIG_STORAGE_TOPIC
+              value: connect-config-topic
+            - name: CONNECT_OFFSET_STORAGE_TOPIC
+              value: connect-offset-topic
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: connect-status-topic
+            - name: CONNECT_KEY_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: CONNECT_VALUE_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: kafka-connect
+            - name: CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_STATUS_STORAGE_REPLICATION_FACTOR
+              value: "1"

@@ -10,4 +10,6 @@ __pycache__
 .terraform.lock.hcl
 
 infra/k8s/kafka.yaml
+infra/k8s/kafka-connect.yaml
+infra/k8s/demo-services.yaml
 kafka-connect/pubsub-connector.json
