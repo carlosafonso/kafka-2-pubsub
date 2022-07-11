@@ -137,7 +137,7 @@ Once you see messages like these, we are all good:
 
 We can confirm that the connector is working by going back to the subscription details page in the Pub/Sub console and clicking *Pull* again. This time, messages from both producers should appear almost immediately.
 
-(TBC: screenshot)
+![Pub/Sub subscription messages](pubsub_subscription_messages.png)
 
 ### Migrating the consumers
 
@@ -198,7 +198,7 @@ INFO:root:Callback succeeded, message has been acknowledged
 
 We can also check this in the Pub/Sub console: still in the subscription details page, if you select the *Metrics* tab you should see a sharp drop in the *Unacked message count* metric, which corresponds to the moment when the consumer began pulling messages from Pub/Sub.
 
-(TBC: screenshot)
+![Pub/Sub unacked message count metric](pubsub_unacked_message_count.png)
 
 To complete this part, let's repeat the steps above for Consumer B (remember to set the `K2PS_PUBSUB_SUBSCRIPTION` to `projects/<YOUR_GCP_PROJECT_NAME>/subscriptions/kafka-2-pubsub-subscription-b` instead of `subscription-a`).
 
