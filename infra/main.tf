@@ -96,6 +96,12 @@ resource "google_project_iam_member" "gke_pubsub_publisher" {
   member = "serviceAccount:${google_service_account.gke.email}"
 }
 
+resource "google_project_iam_member" "gke_pubsub_subscriber" {
+  project = var.project
+  role = "roles/pubsub.subscriber"
+  member = "serviceAccount:${google_service_account.gke.email}"
+}
+
 resource "google_project_iam_member" "gke_artifact_registry_viewer" {
   project = var.project
   role = "roles/artifactregistry.reader"
