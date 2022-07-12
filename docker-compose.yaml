@@ -39,3 +39,27 @@ services:
     depends_on:
       - kafka
     command: ["/usr/bin/startup.sh"]
+
+  producer:
+    build: ./src
+    environment:
+      - K2PS_ENV=dev
+      - K2PS_BUS_BACKEND=kafka
+      - K2PS_KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - K2PS_KAFKA_TOPIC=kafka-2-pubsub
+    depends_on:
+      - kafka
+      - connect
+    command: ["/app/produce.py", "Producer"]
+
+  consumer:
+    build: ./src
+    environment:
+      - K2PS_ENV=dev
+      - K2PS_BUS_BACKEND=kafka
+      - K2PS_KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - K2PS_KAFKA_TOPIC=kafka-2-pubsub
+    depends_on:
+      - kafka
+      - connect
+    command: ["/app/consume.py", "Consumer"]
