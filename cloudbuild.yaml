@@ -1,0 +1,25 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Build
+    args:
+    - 'build'
+    - '-t'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/kafka-2-pubsub/kafka-2-pubsub:$SHORT_SHA'
+    - './src'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Push
+    args:
+    - 'push'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/kafka-2-pubsub/kafka-2-pubsub:$SHORT_SHA'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Create release'
+    entrypoint: gcloud
+    args:
+      [
+        'deploy', 'releases', 'create', 'rel-${SHORT_SHA}',
+        '--delivery-pipeline', 'kafka-2-pubsub',
+        '--region', 'us-central1',
+        '--images', 'kafka-2-pubsub=us-central1-docker.pkg.dev/${PROJECT_ID}/kafka-2-pubsub/kafka-2-pubsub:${SHORT_SHA}'
+      ]

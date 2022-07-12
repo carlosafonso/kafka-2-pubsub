@@ -133,3 +133,18 @@ resource "google_container_node_pool" "nodepool" {
     ]
   }
 }
+
+resource "google_sourcerepo_repository" "source_repo" {
+  name = "kafka-2-pubsub"
+}
+
+resource "google_cloudbuild_trigger" "trigger" {
+  name = "kafka-2-pubsub"
+
+  trigger_template {
+    repo_name = split("/repos/", google_sourcerepo_repository.source_repo.id)[1]
+    branch_name = "master"
+  }
+
+  filename = "cloudbuild.yaml"
+}
