@@ -1,0 +1,26 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: producer-a
+spec:
+  template:
+    spec:
+      containers:
+        - name: producer
+          env:
+            - name: K2PS_ENV
+              value: "dev"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: producer-b
+spec:
+  template:
+    spec:
+      containers:
+        - name: producer
+          env:
+            - name: K2PS_ENV
+              value: "dev"

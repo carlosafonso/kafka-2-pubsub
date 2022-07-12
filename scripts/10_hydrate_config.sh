@@ -2,9 +2,11 @@
 
 set -euo pipefail
 
+envsubst < ./skaffold.yaml.dist > ./skaffold.yaml
 envsubst < ./infra/k8s/kafka.yaml.dist > ./infra/k8s/kafka.yaml
 envsubst < ./infra/k8s/kafka-connect.yaml.dist > ./infra/k8s/kafka-connect.yaml
 envsubst < ./infra/k8s/demo-services.yaml.dist > ./infra/k8s/demo-services.yaml
+envsubst < ./infra/k8s/base/demo-services.yaml.dist > ./infra/k8s/base/demo-services.yaml
 envsubst < ./kafka-connect/pubsub-connector.json.dist > ./kafka-connect/pubsub-connector.json
 
 cat > ./infra/terraform.tfvars <<-EOF

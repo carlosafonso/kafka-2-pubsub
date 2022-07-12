@@ -134,12 +134,27 @@ resource "google_container_node_pool" "nodepool" {
   }
 }
 
+resource "google_service_account" "cloudbuild" {
+  account_id   = "kafka-2-pubsub-cloudbuild"
+  display_name = "kafka2pubsub - Service account for running Cloud Build builds"
+}
+
+# To-Do: we probably want to narrow this down to just the required permissions,
+# including the clouddeploy.released role (https://cloud.google.com/deploy/docs/integrating-ci#calling_from_your_ci_pipeline)
+# for creating a Cloud Deploy release after a successful build.
+resource "google_project_iam_member" "cloudbuild" {
+  project = var.project
+  role = "roles/owner"
+  member = "serviceAccount:${google_service_account.cloudbuild.email}"
+}
+
 resource "google_sourcerepo_repository" "source_repo" {
   name = "kafka-2-pubsub"
 }
 
 resource "google_cloudbuild_trigger" "trigger" {
   name = "kafka-2-pubsub"
+  service_account = google_service_account.cloudbuild.id
 
   trigger_template {
     repo_name = split("/repos/", google_sourcerepo_repository.source_repo.id)[1]
@@ -147,4 +162,25 @@ resource "google_cloudbuild_trigger" "trigger" {
   }
 
   filename = "cloudbuild.yaml"
+}
+
+resource "google_clouddeploy_target" "prod" {
+  location = var.region
+  name = "kafka-2-pubsub-prod"
+
+  gke {
+    cluster = google_container_cluster.cluster.id
+  }
+}
+
+resource "google_clouddeploy_delivery_pipeline" "pipeline" {
+  location = var.region
+  name = "kafka-2-pubsub"
+
+  serial_pipeline {
+    stages {
+      target_id = "kafka-2-pubsub-prod"
+      profiles = ["prod"]
+    }
+  }
 }

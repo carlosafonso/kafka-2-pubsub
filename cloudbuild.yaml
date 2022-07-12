@@ -1,17 +1,11 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    id: Build
+  - name: 'gcr.io/k8s-skaffold/skaffold'
+    id: 'Build artifact'
     args:
-    - 'build'
-    - '-t'
-    - 'us-central1-docker.pkg.dev/$PROJECT_ID/kafka-2-pubsub/kafka-2-pubsub:$SHORT_SHA'
-    - './src'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    id: Push
-    args:
-    - 'push'
-    - 'us-central1-docker.pkg.dev/$PROJECT_ID/kafka-2-pubsub/kafka-2-pubsub:$SHORT_SHA'
+      - 'skaffold'
+      - 'build'
+      - '--interactive=false'
+      - '--file-output=/workspace/artifacts.json'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Create release'
@@ -21,5 +15,8 @@ steps:
         'deploy', 'releases', 'create', 'rel-${SHORT_SHA}',
         '--delivery-pipeline', 'kafka-2-pubsub',
         '--region', 'us-central1',
-        '--images', 'kafka-2-pubsub=us-central1-docker.pkg.dev/${PROJECT_ID}/kafka-2-pubsub/kafka-2-pubsub:${SHORT_SHA}'
+        '--build-artifacts', '/workspace/artifacts.json'
       ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
