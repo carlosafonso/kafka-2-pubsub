@@ -48,7 +48,7 @@ Both producers and consumers are in fact the same demo application, stored under
 
 Outside of the GKE cluster, the following has already been deployed for you as well:
 
-* A Pub/Sub topic (`kafka-2-pubsub`) with two subscriptions (`kafka-2-pubsub-subscription-a` and `kafka-2-pubsub-subscription-a`).
+* A Pub/Sub topic (`kafka-2-pubsub`) with two subscriptions (`kafka-2-pubsub-subscription-a` and `kafka-2-pubsub-subscription-b`).
 * An Artifact Registry repository where the custom Docker images are stored. The deployment script will have already push the images for you.
 * IAM Service Accounts with the appropriate role bindings in order for everything to work as expected.
 
