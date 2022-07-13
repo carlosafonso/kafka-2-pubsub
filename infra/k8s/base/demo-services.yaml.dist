@@ -52,3 +52,57 @@ spec:
               value: "kafka-2-pubsub"
             - name: K2PS_KAFKA_BOOTSTRAP_SERVER
               value: "kafka:9092"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: consumer-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-a
+  template:
+    metadata:
+      labels:
+        app: consumer-a
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/consume.py"]
+          args: ["Consumer A"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: consumer-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-b
+  template:
+    metadata:
+      labels:
+        app: consumer-b
+    spec:
+      containers:
+        - name: producer
+          image: us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/kafka-2-pubsub/kafka-2-pubsub:latest
+          command: ["/app/consume.py"]
+          args: ["Consumer B"]
+          env:
+            - name: K2PS_BUS_BACKEND
+              value: "kafka"
+            - name: K2PS_KAFKA_TOPIC
+              value: "kafka-2-pubsub"
+            - name: K2PS_KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
