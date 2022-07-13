@@ -1,0 +1,6 @@
+# We are excluding these files from Git via .gitignore, but we need them during
+# the deployment process. However, Cloud Deploy uses .gitignore as a reference
+# in order to exclude files when uploading a bundle to GCS if no .gcloudignore
+# is present. Thus, we explicitly include them here.
+!infra/k8s/base/demo-services.yaml
+!skaffold.yaml
