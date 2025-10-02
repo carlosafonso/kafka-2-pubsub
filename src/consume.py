@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+from kafka.errors import NoBrokersAvailable
 from kafka2pubsub import get_bus, init_logging
 import logging
 import os
@@ -10,15 +11,29 @@ def consume(consumer_name, env):
         logging.info("Received data: %s" % data)
 
     init_logging()
-    logging.info("Consumer '%s' initializing, environment is '%s'" % (consumer_name, env))
+    logging.info("Consumer '%s' initializing, environment is '%s'" %
+                 (consumer_name, env))
 
-    bus = get_bus()
-    bus.subscribe(callback)
+    bus = None
+    while True:
+        try:
+            bus = get_bus()
+            logging.info("Kafka is ready.")
+            bus.subscribe(callback)
+            break
+        except NoBrokersAvailable as e:
+            logging.info("Kafka is not ready yet.")
+            time.sleep(1)
+            continue
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Consumes messages from an event bus.')
-    parser.add_argument('consumer_name', type=str, help='The name of this consumer.')
+    parser = argparse.ArgumentParser(
+        description='Consumes messages from an event bus.'
+    )
+    parser.add_argument('consumer_name',
+                        type=str,
+                        help='The name of this consumer.')
     args = parser.parse_args()
 
     env = 'undefined'
